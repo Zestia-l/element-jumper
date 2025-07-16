@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overlay Element 测试</title>
+</head>
+<body>
+  <h1>Overlay Element 测试</h1>
+
+  <!-- 使用 click 触发的示例 -->
+  <overlay-element trigger="click">
+    <img src="https://picsum.photos/300/200" alt="示例图片">
+    <div slot="overlay-content">
+      <button>点击查看详情</button>
+    </div>
+  </overlay-element>
+
+  <!-- 使用 hover 触发的示例 -->
+  <overlay-element trigger="hover">
+    <div style="width: 300px; height: 200px; background: lightblue;">
+      悬停查看效果
+    </div>
+    <div slot="overlay-content">
+      <span>这是悬停内容</span>
+    </div>
+  </overlay-element>
+
+  <!-- 引入组件 -->
+  <script type="module" src="overlay-element.js"></script>
+</body>
+</html>
