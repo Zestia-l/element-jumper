@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三列布局示例</title>
+    <script type="module" src="overlay-element.js"></script>
+    <style>
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh; /* 确保页面占满整个视口高度 */
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* 容器样式 */
+        .container {
+            display: flex; /* 使用Flexbox实现三列布局 */
+            width: 100%;
+            min-height: 100vh; /* 高度与视口一致 */
+        }
+
+        /* 列通用样式 */
+        .column {
+            flex: 1; /* 三列平均分配宽度 */
+            padding: 2rem; /* 内边距 */
+            color: #fff; /* 文字颜色为白色，与背景形成对比 */
+            transition: all 0.3s ease; /* 过渡动画，提升交互体验 */
+        }
+
+        /* 第一列：浅蓝背景 */
+        .column-1 {
+            background-color: #3498db; /* 蓝色 */
+        }
+
+        /* 第二列：浅绿背景 */
+        .column-2 {
+            background-color: #2ecc71; /* 绿色 */
+            flex: 1.5; /* 中间列宽度稍宽，比例为1.5 */
+        }
+
+        /* 第三列：浅紫背景 */
+        .column-3 {
+            background-color: #9b59b6; /* 紫色 */
+        }
+
+        /* 列标题样式 */
+        .column h2 {
+            margin-bottom: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+            padding-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 第一列 -->
+        <overlay-element>
+        <div class="column column-1">
+            <h2>第一列</h2>
+            <p>这是三列布局中的第一列，背景色为蓝色。</p>
+            <p>在大屏幕上并排显示，小屏幕下自动堆叠。</p>
+        </div>
+        </overlay-element>
+        <!-- 第二列 -->
+        <overlay-element>
+        <div class="column column-2">
+            <h2>第二列</h2>
+            <p>这是中间列，宽度略宽于其他两列，背景色为绿色。</p>
+            <p>包含更多内容示例，展示布局的适应性。</p>
+            <p>Flexbox 布局会自动分配空间，保持整体结构稳定。</p>
+        </div>
+      </overlay-element>
+
+        <!-- 第三列 -->
+         <overlay-element>
+        <div class="column column-3">
+            <h2>第三列</h2>
+            <p>这是三列布局中的最后一列，背景色为紫色。</p>
+            <p>响应式设计确保在各种设备上都有良好的显示效果。</p>
+        </div>
+      </overlay-element>
+    </div>
+</body>
+</html>
