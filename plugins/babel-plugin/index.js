@@ -6,14 +6,29 @@ module.exports = function({ types: t }) {
       visitor: {
         //当访问到 JSXElement 节点时执行此函数
         JSXElement(path) {
+          //跳过处理过的节点
+          if (path.getData('isOverlayWrapped')) return;
           if (process.env.NODE_ENV !== 'development') return;
-          
+          // 跳过对 <overlay-element> 自身的处理，防止递归
+          const tagName = path.node.openingElement.name.name;
+          if (tagName === 'overlay-element') {
+            return; // 终止递归
+          }
+          if (tagName[0] !== tagName[0].toUpperCase()) {
+            return; // 跳过原生 HTML 标签（如 div、p、button 等）
+          }
           //文件名
           const filename = this.file.opts.filename;
+          // 安全获取位置信息
+          const loc = path.node.openingElement.loc;
+          if (!loc || !loc.start) {
+            console.warn(`[DevOverlay] 无法获取位置信息: ${filename}`);
+            return; // 跳过处理
+          }
           //行列信息
           const { line, column } = path.node.openingElement.loc.start;
           //调试id
-          const debugId = `cmp-${line}-${column}-${Date.now()}`;
+          const debugId = `cmp-${line}-${column}`; 
           //新的jsx元素用于替换
           const overlayElement = t.jsxElement(
             //开始标签
@@ -42,8 +57,11 @@ module.exports = function({ types: t }) {
             //原始的jsx元素作为子元素
             [path.node]
           );
+          //标记处理过的节点
+          path.setData('isOverlayWrapped', true);
           //替换
           path.replaceWith(overlayElement);
+          path.skip(); // 停止当前节点的后续遍历，防止二次触发
         }
       }
     };
