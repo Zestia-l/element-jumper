@@ -26,7 +26,6 @@ class OverlayElement extends LitElement {
     }
   `;
 
-  // 定义属性（替代 @property 装饰器）
   static properties = {
     active: { type: Boolean, reflect: true },
     trigger: { type: String }
@@ -34,7 +33,6 @@ class OverlayElement extends LitElement {
 
   constructor() {
     super();
-    // 初始化属性值
     this.active = true;
     this.trigger = 'click';
   }
@@ -52,12 +50,9 @@ class OverlayElement extends LitElement {
   render() {
     return html`
       <slot></slot>
-      <div class="overlay">
-        <slot name="overlay-content"></slot>
-      </div>
+      <div class="overlay"></div>
     `;
   }
 }
 
-// 手动注册组件（替代 @customElement 装饰器）
 customElements.define('overlay-element', OverlayElement);
