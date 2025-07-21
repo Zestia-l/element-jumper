@@ -1,5 +1,5 @@
 {
-  "name": "webpack-plugin",
+  "name": "webpack-dev-overlay-plugin",
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
