@@ -1,68 +1,132 @@
-// babel-plugin.js
-//导出babel插件函数，接收 Babel API 对象，解构出类型工具集
 module.exports = function({ types: t }) {
-    return {
-      //定义visitor对象，包含对各种节点类型的处理函数
-      visitor: {
-        //当访问到 JSXElement 节点时执行此函数
-        JSXElement(path) {
-          //跳过处理过的节点
-          if (path.getData('isOverlayWrapped')) return;
-          if (process.env.NODE_ENV !== 'development') return;
-          // 跳过对 <overlay-element> 自身的处理，防止递归
-          const tagName = path.node.openingElement.name.name;
-          if (tagName === 'overlay-element') {
-            return; // 终止递归
+  return {
+    visitor: {
+      JSXElement(path, state) {
+        if (process.env.NODE_ENV !== 'development') return;
+        
+        // 跟踪嵌套层级，只处理第一层子组件
+        state.currentDepth = (state.currentDepth || 1);
+        if (state.currentDepth > 1) return;
+        
+        const tagName = path.node.openingElement.name.name;
+        // 跳过非自定义组件和特殊组件
+        if (tagName[0] !== tagName[0].toUpperCase() || tagName === 'overlay-element') return;
+        
+        const filename = this.file.opts.filename;
+        if (filename && filename.endsWith('devOverlay.jsx')) return;
+        
+        const loc = path.node.openingElement.loc;
+        if (!loc || !loc.start) return;
+        
+        // 跳过根组件（被render直接调用的组件）
+        if (isRootComponent(path, t)) return;
+        
+        const { line, column } = loc.start;
+        const debugId = `cmp-${line}-${column}`;
+        const program = path.findParent(p => p.isProgram());
+        if (!program) return;
+        
+        // 导入withDevOverlay
+        let hasImport = false;
+        program.node.body.forEach(node => {
+          if (t.isImportDeclaration(node) && node.source.value === './devOverlay') {
+            hasImport = true;
           }
-          if (tagName[0] !== tagName[0].toUpperCase()) {
-            return; // 跳过原生 HTML 标签（如 div、p、button 等）
-          }
-          //文件名
-          const filename = this.file.opts.filename;
-          // 安全获取位置信息
-          const loc = path.node.openingElement.loc;
-          if (!loc || !loc.start) {
-            console.warn(`[DevOverlay] 无法获取位置信息: ${filename}`);
-            return; // 跳过处理
-          }
-          //行列信息
-          const { line, column } = path.node.openingElement.loc.start;
-          //调试id
-          const debugId = `cmp-${line}-${column}`; 
-          //新的jsx元素用于替换
-          const overlayElement = t.jsxElement(
-            //开始标签
-            t.jsxOpeningElement(
-              //标签名
-              t.jsxIdentifier('overlay-element'),
-              [
-                //标签属性
-                t.jsxAttribute(t.jsxIdentifier('debug-id'), t.stringLiteral(debugId)),
-                t.jsxAttribute(t.jsxIdentifier('file'), t.stringLiteral(filename)),
-                t.jsxAttribute(t.jsxIdentifier('line'), t.stringLiteral(line.toString())),
-                t.jsxAttribute(t.jsxIdentifier('column'), t.stringLiteral(column.toString())),
-                t.jsxAttribute(
-                  t.jsxIdentifier('active'),
-                  t.jsxExpressionContainer(
-                    t.memberExpression(
-                      t.identifier('window'),
-                      t.identifier('__DEV_OVERLAY_ACTIVE')
-                    )
-                  )
-                )
-              ]
-            ),
-            //结束标签
-            t.jsxClosingElement(t.jsxIdentifier('overlay-element')),
-            //原始的jsx元素作为子元素
-            [path.node]
+        });
+        if (!hasImport) {
+          program.node.body.unshift(
+            t.importDeclaration(
+              [t.importSpecifier(t.identifier('withDevOverlay'), t.identifier('withDevOverlay'))],
+              t.stringLiteral('./devOverlay')
+            )
           );
-          //标记处理过的节点
-          path.setData('isOverlayWrapped', true);
-          //替换
-          path.replaceWith(overlayElement);
-          path.skip(); // 停止当前节点的后续遍历，防止二次触发
         }
+        
+        const overlayVarName = `OverlayWrapper_${line}_${column}`;
+        const wrapperCall = t.callExpression(
+          t.identifier('withDevOverlay'),
+          [
+            t.identifier(tagName),
+            t.objectExpression([
+              t.objectProperty(t.identifier('debugId'), t.stringLiteral(debugId)),
+              t.objectProperty(t.identifier('file'), t.stringLiteral(filename)),
+              t.objectProperty(t.identifier('line'), t.numericLiteral(line)),
+              t.objectProperty(t.identifier('column'), t.numericLiteral(column)),
+            ])
+          ]
+        );
+        
+        // 替换JSX元素为包装组件
+        path.replaceWith(
+          t.jsxElement(
+            t.jsxOpeningElement(t.jsxIdentifier(overlayVarName), path.node.openingElement.attributes),
+            t.jsxClosingElement(t.jsxIdentifier(overlayVarName)),
+            path.node.children,
+            path.node.selfClosing
+          )
+        );
+        
+        // 创建包装器变量声明
+        const overlayVar = t.variableDeclaration('const', [
+          t.variableDeclarator(t.identifier(overlayVarName), wrapperCall)
+        ]);
+        
+        // 核心修改：确保OverlayWrapper在App组件之前声明
+        const appComponentIndex = findAppComponentIndex(program.node.body, t);
+        
+        // 如果找到App组件，在其之前插入；否则在文件末尾插入
+        const insertIndex = appComponentIndex !== -1 ? appComponentIndex : program.node.body.length;
+        
+        // 避免重复插入
+        const hasDuplicate = program.node.body.some(node => 
+          t.isVariableDeclaration(node) && 
+          node.declarations.some(decl => decl.id.name === overlayVarName)
+        );
+        
+        if (!hasDuplicate && insertIndex !== undefined && insertIndex >= 0) {
+          program.node.body.splice(insertIndex, 0, overlayVar);
+        }
+        
+        // 跳过子节点处理
+        state.currentDepth++;
+        path.traverse({ JSXElement(childPath) { childPath.skip(); } });
+        state.currentDepth--;
       }
-    };
+    }
   };
+};
+
+// 查找App组件的位置
+function findAppComponentIndex(bodyNodes, t) {
+  for (let i = 0; i < bodyNodes.length; i++) {
+    const node = bodyNodes[i];
+    
+    // 查找变量声明形式的App组件 (var App = ...)
+    if (t.isVariableDeclaration(node)) {
+      const hasAppDeclaration = node.declarations.some(decl => 
+        decl.id.name === 'App' && 
+        (t.isFunctionExpression(decl.init) || t.isArrowFunctionExpression(decl.init))
+      );
+      if (hasAppDeclaration) return i;
+    }
+    
+    // 查找函数声明形式的App组件 (function App() { ... })
+    if (t.isFunctionDeclaration(node) && node.id.name === 'App') {
+      return i;
+    }
+  }
+  
+  return -1; // 未找到App组件
+}
+
+// 判断是否是根组件（被render直接调用的组件）
+function isRootComponent(path, t) {
+  const parent = path.parentPath;
+  if (parent.isCallExpression()) {
+    const callee = parent.node.callee;
+    if (t.isMemberExpression(callee) && callee.property.name === 'render') {
+      return true;
+    }
+  }
+  return false;
+}
