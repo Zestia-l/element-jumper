@@ -4,7 +4,6 @@
   "description": "",
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=development webpack serve --config webpack.config.js",
@@ -18,6 +17,7 @@
     "webpack-dev-server": "^4.15.2"
   },
   "dependencies": {
+    "lit": "^3.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

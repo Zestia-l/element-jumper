@@ -1,6 +1,5 @@
 // webpack-vscode-jump-plugin.js
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-
 class VscodeJumpPlugin {
   constructor(options = {}) {
     this.options = options;
@@ -13,6 +12,7 @@ class VscodeJumpPlugin {
       HtmlWebpackPlugin.getHooks(compilation).afterTemplateExecution.tap(
         'VscodeJumpPlugin',
         (data) => {
+          console.log('插件2被调用了！！！！');
           // 注入VSCode跳转逻辑
           data.html = data.html.replace('</body>', `
             <script>

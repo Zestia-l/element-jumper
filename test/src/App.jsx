@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import '../../src/component/overlay-element';
-
+import '../../src/component/overlay-element.mjs';
 // 测试组件1
 const Header = () => {
   return <h1>测试页面标题</h1>;
