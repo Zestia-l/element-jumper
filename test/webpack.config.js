@@ -5,7 +5,7 @@ const VscodeJumpPlugin = require('../plugins/webpack-vscode-jump-plugin');
 
 
 module.exports = {
-  mode: process.env.NODE_ENV || 'development',
+  mode: 'development',
   entry: './src/App.jsx', // 入口文件路径
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -28,7 +28,7 @@ module.exports = {
                 ['@babel/preset-env',{ modules: false }]
               ],
             plugins: [
-            process.env.NODE_ENV === 'development' && require('../plugins/babel-plugin/index'), 
+            require('../plugins/babel-plugin/index'), 
             ].filter(Boolean),
             sourceType: "module",
             overrides: [
@@ -58,11 +58,7 @@ module.exports = {
     port: 3000,
     hot: true
   },
-  mode: process.env.NODE_ENV || 'development',
   plugins: [
-    new (require('webpack').DefinePlugin)({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
-    }),
     new HtmlWebpackPlugin({
       template: './public/index.html',
       filename: 'index.html' 
