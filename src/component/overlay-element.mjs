@@ -1,5 +1,4 @@
-// import { LitElement, html, css } from 'lit';
-import { LitElement, html, css } from 'https://cdn.jsdelivr.net/npm/lit@3.0.0/+esm';
+import { LitElement, html, css } from 'lit';
 class OverlayElement extends LitElement {
   static styles = css`
     :host {
