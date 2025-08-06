@@ -89,7 +89,7 @@ class DevOverlayPlugin {
         const modifiedHtml = originalHtml
           .replace('</body>', `
             <div id="__dev_overlay_panel" style="position:fixed; bottom:20px; right:20px; z-index:9999;">
-              <button id="__toggle_overlay">Toggle Overlay</button>
+              <button id="__toggle_overlay">开启代码定位功能</button>
             </div>
             </body>
           `)
@@ -98,8 +98,9 @@ class DevOverlayPlugin {
               window.__DEV_OVERLAY_ACTIVE = false;
               document.getElementById('__toggle_overlay').addEventListener('click', () => {
                 window.__DEV_OVERLAY_ACTIVE = !window.__DEV_OVERLAY_ACTIVE;
+                window.dispatchEvent(new Event('dev-overlay-active-change'));
                 document.getElementById('__toggle_overlay').textContent = 
-                  window.__DEV_OVERLAY_ACTIVE ? 'Hide Overlay' : 'Show Overlay';
+                  window.__DEV_OVERLAY_ACTIVE ? '关闭代码定位功能' : '开启代码定位功能';
               });
             </script>
             </body>

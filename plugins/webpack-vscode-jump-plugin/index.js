@@ -38,6 +38,8 @@ class VscodeJumpPlugin {
           const injectScript = `
             <script>
               document.addEventListener('click', (e) => {
+                // 判断全局变量是否存在
+                if (!window.__DEV_OVERLAY_ACTIVE) return;
                 // 查找带目标属性的元素
                 const attrNames = ['${this.attrs.file}', '${this.attrs.line}', '${this.attrs.column}'];
                 const targetEl = e.target.closest(

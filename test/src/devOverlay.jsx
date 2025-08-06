@@ -15,7 +15,6 @@ export function withDevOverlay(Component, options) {
       file={options.file}
       line={options.line}
       column={options.column}
-      active={window.__DEV_OVERLAY_ACTIVE}
     >
       <Component {...props} />
     </overlay-element>

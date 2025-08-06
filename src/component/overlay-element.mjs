@@ -32,19 +32,34 @@ class OverlayElement extends LitElement {
 
   constructor() {
     super();
-    this.active = true;
-    this.trigger = 'click';
+    this.active = false; // 默认不激活overlay元素
   }
 
   connectedCallback() {
     super.connectedCallback();
-    if (this.trigger === 'click') {
-      this.addEventListener('click', () => this.active = !this.active);
-    } else {
-      this.addEventListener('mouseenter', () => this.active = true);
-      this.addEventListener('mouseleave', () => this.active = false);
+    this.updateEventListeners();
+    window.addEventListener('dev-overlay-active-change', () => {
+      this.updateEventListeners();
+    });
+  }
+  updateEventListeners() {
+    const isActive = window.__DEV_OVERLAY_ACTIVE === true;
+    // 移除已有的事件监听器（避免重复绑定）
+    this.removeEventListener('mouseenter', this.handleMouseEnter);
+    this.removeEventListener('mouseleave', this.handleMouseLeave);
+    
+    if (isActive) {
+      this.addEventListener('mouseenter', this.handleMouseEnter);
+      this.addEventListener('mouseleave', this.handleMouseLeave);
     }
   }
+  handleMouseEnter = () => {
+    this.active = true;
+  };
+
+  handleMouseLeave = () => {
+    this.active = false;
+  };
 
   render() {
     return html`
