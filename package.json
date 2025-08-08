@@ -11,14 +11,20 @@
     "url": "git+https://github.com/Zestia-l/element-jumper.git"
   },
   "license": "ISC",
-  "author": "",
-  "type": "commonjs",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
+  "author": "Zestia",
+  "type": "module",
+  "exports": { 
+    ".": {
+      "require": "./src/index.js",
+      "import": "./src/index.js"
+    },
+    "./babel-plugin": "./src/babel-plugin/index.js",
+    "./webpack-plugin": "./src/webpack-plugins/index.js", 
+    "./component": "./src/component/overlay-element.mjs" 
   },
-  "workspaces": [
-    "plugins/*"
+  "files": [
+    "src/",
+    "README.md"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -52,5 +58,14 @@
     "source-map": "^0.7.4",
     "vscode-uri": "^3.0.6",
     "webextension-polyfill": "^0.10.0"
-  }
+  },
+  "keywords": [
+    "vscode",
+    "element",
+    "jumper",
+    "frontend",
+    "debugging",
+    "babel-plugin",
+    "webpack-plugin"
+  ]
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-
+import '../../src/component/overlay-element.mjs';
 export function withDevOverlay(Component, options) {
   if (!Component) {
     console.error('withDevOverlay 接收的 Component 为 undefined');

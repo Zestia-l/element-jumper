@@ -1,7 +1,7 @@
 const path = require('path');
-const DevOverlayPlugin = require('../plugins/webpack-dev-overlay-plugin');
+const DevOverlayPlugin = require('../src/webpack-plugins/dev-overlay-plugin.js');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const VscodeJumpPlugin = require('../plugins/webpack-vscode-jump-plugin');
+const VscodeJumpPlugin = require('../src/webpack-plugins/vscode-jump-plugin.js');
 
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
                 ['@babel/preset-env',{ modules: false }]
               ],
             plugins: [
-            require('../plugins/babel-plugin/index'), 
+            require('../src/babel-plugin/index.js'), 
             ].filter(Boolean),
             sourceType: "module",
             overrides: [

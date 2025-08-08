@@ -10,7 +10,7 @@ class OverlayElement extends LitElement {
     .overlay {
       position: absolute;
       inset: 0;
-      background: rgba(45, 45, 45, 0.92);
+      background: rgba(124, 124, 124, 0.44);
       opacity: 0;
       visibility: hidden;
       transition: 0.3s;
