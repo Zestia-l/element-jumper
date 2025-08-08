@@ -2,27 +2,36 @@ module.exports = function({ types: t }) {
   return {
     visitor: {
       JSXElement(path, state) {
+        //判断是否在开发环境（环境变量由webpack配置或者运行时注入）
         if (process.env.NODE_ENV !== 'development') return;
         
         // 跟踪嵌套层级，只处理第一层子组件
         state.currentDepth = (state.currentDepth || 1);
         if (state.currentDepth > 1) return;
         
+        //通过path获取JSX元素的tagName，也就是组件名
         const tagName = path.node.openingElement.name.name;
         // 跳过非自定义组件和特殊组件
         if (tagName[0] !== tagName[0].toUpperCase() || tagName === 'overlay-element') return;
         
+        //通过this.file获取当前文件信息
         const filename = this.file.opts.filename;
+        // 跳过特定文件（如开发覆盖层组件本身）
         if (filename && filename.endsWith('devOverlay.jsx')) return;
         
+        //通过path获取JSX元素的位置信息
         const loc = path.node.openingElement.loc;
         if (!loc || !loc.start) return;
         
         // 跳过根组件（被render直接调用的组件）
         if (isRootComponent(path, t)) return;
         
+        // 获取行列信息并生成唯一的debugId
         const { line, column } = loc.start;
         const debugId = `cmp-${line}-${column}`;
+        
+        // 增加对嵌套组件的支持，通过递归调用自身来处理子元素
+        // 这里不知道Program是什么意思
         const program = path.findParent(p => p.isProgram());
         if (!program) return;
         
@@ -122,8 +131,10 @@ function findAppComponentIndex(bodyNodes, t) {
 // 判断是否是根组件（被render直接调用的组件）
 function isRootComponent(path, t) {
   const parent = path.parentPath;
+  // 判断父路径是否为函数调用callExpression，并且callee是render方法
   if (parent.isCallExpression()) {
     const callee = parent.node.callee;
+    // 如果callee是一个成员表达式，直接检查是否是'render'
     if (t.isMemberExpression(callee) && callee.property.name === 'render') {
       return true;
     }
