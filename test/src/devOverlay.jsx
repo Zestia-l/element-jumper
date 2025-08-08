@@ -1,5 +1,5 @@
 import React from 'react';
-
+import '../../src/component/overlay-element.mjs';
 export function withDevOverlay(Component, options) {
   if (!Component) {
     console.error('withDevOverlay 接收的 Component 为 undefined');
@@ -15,7 +15,6 @@ export function withDevOverlay(Component, options) {
       file={options.file}
       line={options.line}
       column={options.column}
-      active={window.__DEV_OVERLAY_ACTIVE}
     >
       <Component {...props} />
     </overlay-element>
